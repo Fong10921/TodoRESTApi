@@ -23,10 +23,12 @@ public class Todo
     [Required]
     public TodoStatus Status { get; set; } = TodoStatus.Pending;
     
+    [Required]
     public TodoPriority Priority { get; set; } = TodoPriority.Medium;
 
     [MaxLength(50)]
     public string? Category { get; set; }
 
+    [Required]
     public bool IsDeleted { get; set; } = false;
 }

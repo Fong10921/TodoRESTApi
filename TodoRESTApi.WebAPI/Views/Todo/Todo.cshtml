@@ -1,0 +1,52 @@
+@model List<TodoRESTApi.Core.Models.Todo>
+
+@{
+    ViewData["Title"] = "TODO List";
+}
+
+<div class="container mt-4">
+    <h1 class="display-4 text-center">TODO List</h1>
+    
+    <form method="post" asp-action="AddTodo" class="mb-4">
+        <div class="row g-2">
+            <div class="col-md-3">
+                <input type="text" name="Name" class="form-control" placeholder="Task Name" required>
+            </div>
+            <div class="col-md-3">
+                <input type="date" name="DueDate" class="form-control" required>
+            </div>
+            <div class="col-md-2">
+                <select name="Priority" class="form-control">
+                    <option value="0">Low</option>
+                    <option value="1" selected>Medium</option>
+                    <option value="2">High</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">Add TODO</button>
+            </div>
+        </div>
+    </form>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+        <tr>
+            <th>#</th>
+            <th>Task</th>
+            <th>Due Date</th>
+            <th>Priority</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var todo in Model)
+        {
+            <tr>
+                <td>@todo.Id</td>
+                <td>@todo.Name</td>
+                <td>@todo.DueDate.ToShortDateString()</td>
+                <td>@todo.Priority</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

@@ -21,6 +21,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\TodoRESTApi.Core\TodoRESTApi.Core.csproj" />
+      <ProjectReference Include="..\TodoRESTApi.identity\TodoRESTApi.identity.csproj" />
     </ItemGroup>
 
 </Project>
