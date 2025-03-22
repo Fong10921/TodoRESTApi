@@ -1,4 +1,4 @@
-namespace TodoRESTApi.Models;
+namespace TodoRESTApi.WebAPI.Models;
 
 public class ErrorViewModel
 {

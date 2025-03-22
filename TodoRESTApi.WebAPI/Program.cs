@@ -1,5 +1,5 @@
 using Asp.Versioning.ApiExplorer;
-using TodoRESTApi.StartupExtensions;
+using TodoRESTApi.WebAPI.StartupExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

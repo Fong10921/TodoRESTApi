@@ -1,8 +1,10 @@
 ﻿using Asp.Versioning;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using TodoRESTApi.Entities.Context;
 
-namespace TodoRESTApi.StartupExtensions;
+namespace TodoRESTApi.WebAPI.StartupExtensions;
 
 public static class ConfigureServicesExtension
 {
@@ -14,6 +16,13 @@ public static class ConfigureServicesExtension
 
         // Add Controllers to the Dependency Injection
         serviceCollection.AddControllers();
+        
+        if (environment.IsEnvironment("Test") == false)
+        {
+            serviceCollection.AddDbContext<TodoDbContext>(optionsBuilder =>
+                optionsBuilder.UseSqlite("Data Source=app.db")
+            );
+        }
 
         // Add Api Versioning to the Dependency Injection
         serviceCollection.AddApiVersioning(options =>

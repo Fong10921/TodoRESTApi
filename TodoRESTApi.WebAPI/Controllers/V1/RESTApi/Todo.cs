@@ -1,16 +1,16 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 
-namespace TodoRESTApi.Controllers.V2.RESTApi;
+namespace TodoRESTApi.WebAPI.Controllers.V1.RESTApi;
 
 [ApiController]
 [Route("api/v{version:apiVersion}")]
-[ApiVersion("2.0")]
+[ApiVersion("1.0")]
 public class Todo : ControllerBase
 {
     [HttpGet("Todo")]
     public IActionResult Get()
     {
-        return Ok(new { message = "This is version 2.0 of the Document API" });
+        return Ok(new { message = "This is version 1.0 of the Document API" });
     }
 }

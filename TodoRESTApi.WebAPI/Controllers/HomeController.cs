@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using TodoRESTApi.Models;
+using TodoRESTApi.WebAPI.Models;
 
-namespace TodoRESTApi.Controllers;
+namespace TodoRESTApi.WebAPI.Controllers;
 
 public class HomeController : Controller
 {
