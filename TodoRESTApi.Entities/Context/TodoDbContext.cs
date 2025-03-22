@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TodoRESTApi.Entities.Entities;
+using TodoRESTApi.identity.Identity;
 
 namespace TodoRESTApi.Entities.Context;
 
-public class TodoDbContext: DbContext
+public class TodoDbContext: IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
     public virtual DbSet<Todo> Todo { get; set; }
     

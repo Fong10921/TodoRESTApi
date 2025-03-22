@@ -6,6 +6,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoRESTApi.Entities", "Tod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoRESTApi.Core", "TodoRESTApi.Core\TodoRESTApi.Core.csproj", "{C88085AB-FC59-4B3F-AF4E-C39AC4A0CC1E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoRESTApi.identity", "TodoRESTApi.identity\TodoRESTApi.identity.csproj", "{9B2878BD-1C4B-4491-B48E-B091D9901EF0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoRESTApi.Testing", "TodoRESTApi.Testing\TodoRESTApi.Testing.csproj", "{0CA70421-5D3D-4217-BAEF-4E9095D3BCB9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +28,13 @@ Global
 		{C88085AB-FC59-4B3F-AF4E-C39AC4A0CC1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C88085AB-FC59-4B3F-AF4E-C39AC4A0CC1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C88085AB-FC59-4B3F-AF4E-C39AC4A0CC1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B2878BD-1C4B-4491-B48E-B091D9901EF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B2878BD-1C4B-4491-B48E-B091D9901EF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B2878BD-1C4B-4491-B48E-B091D9901EF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B2878BD-1C4B-4491-B48E-B091D9901EF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CA70421-5D3D-4217-BAEF-4E9095D3BCB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CA70421-5D3D-4217-BAEF-4E9095D3BCB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CA70421-5D3D-4217-BAEF-4E9095D3BCB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CA70421-5D3D-4217-BAEF-4E9095D3BCB9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

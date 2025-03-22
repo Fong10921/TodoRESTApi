@@ -1,8 +1,11 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using TodoRESTApi.Entities.Context;
+using TodoRESTApi.identity.Identity;
 
 namespace TodoRESTApi.WebAPI.StartupExtensions;
 
@@ -23,6 +26,18 @@ public static class ConfigureServicesExtension
                 optionsBuilder.UseSqlite("Data Source=app.db")
             );
         }
+        
+        // Add Identity to the App
+        serviceCollection.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+            {
+                options.Password.RequiredLength = 5;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireDigit = true;
+            }).AddEntityFrameworkStores<TodoDbContext>().AddDefaultTokenProviders()
+            .AddUserStore<UserStore<ApplicationUser, ApplicationRole, TodoDbContext, Guid>>()
+            .AddRoleStore<RoleStore<ApplicationRole, TodoDbContext, Guid>>();
 
         // Add Api Versioning to the Dependency Injection
         serviceCollection.AddApiVersioning(options =>
