@@ -6,6 +6,10 @@ using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using TodoRESTApi.Entities.Context;
 using TodoRESTApi.identity.Identity;
+using TodoRESTApi.Repository;
+using TodoRESTApi.RepositoryContracts;
+using TodoRESTApi.Service;
+using TodoRESTApi.ServiceContracts;
 
 namespace TodoRESTApi.WebAPI.StartupExtensions;
 
@@ -55,14 +59,16 @@ public static class ConfigureServicesExtension
         // Add support for discovering API endpoints (including minimal APIs)
         serviceCollection.AddEndpointsApiExplorer();
 
-        // Add the 
+        // Add the Swagger Gen Configuration to the Dependency Injection
         serviceCollection.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-
 
         // Register Swagger generator for API documentation
         serviceCollection.AddSwaggerGen();
-
-
+        
+        // Add the TodoService and TodoRepository to the Dependency Injection
+        serviceCollection.AddScoped<ITodoRepository, TodoRepository>();
+        serviceCollection.AddScoped<ITodoService, TodoService>();
+        
         return serviceCollection;
     }
 }

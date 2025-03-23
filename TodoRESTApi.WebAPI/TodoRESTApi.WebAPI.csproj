@@ -25,6 +25,9 @@
 
     <ItemGroup>
       <ProjectReference Include="..\TodoRESTApi.Entities\TodoRESTApi.Entities.csproj" />
+      <ProjectReference Include="..\TodoRESTApi.Repository\TodoRESTApi.Repository.csproj" />
+      <ProjectReference Include="..\TodoRESTApi.ServiceContracts\TodoRESTApi.ServiceContracts.csproj" />
+      <ProjectReference Include="..\TodoRESTApi.Service\TodoRESTApi.Service.csproj" />
     </ItemGroup>
 
     <ItemGroup>

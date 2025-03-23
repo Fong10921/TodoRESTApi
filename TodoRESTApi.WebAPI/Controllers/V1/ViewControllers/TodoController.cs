@@ -1,3 +1,4 @@
+/*
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +12,7 @@ namespace TodoRESTApi.WebAPI.Controllers.V1.ViewControllers
         [Route("todo")]
         public ActionResult Index()
         {
-            return View("~/Views/Todo/Todo.cshtml");
+            return View("~/Views/TodoController/TodoController.cshtml");
         }
 
         // GET: TodoController/Details/5
@@ -84,3 +85,4 @@ namespace TodoRESTApi.WebAPI.Controllers.V1.ViewControllers
         }
     }
 }
+*/
