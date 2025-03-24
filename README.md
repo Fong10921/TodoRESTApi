@@ -13,6 +13,7 @@ The API is designed following REST principles and comes with Swagger UI enabled 
 - Install from https://dotnet.microsoft.com/en-us/download/dotnet/8.0
 - Run dotnet --list-sdks
 - Make sure it list 8.0.407 [C:\Program Files\dotnet\sdk]
+- Note: 8.0.407 is the SDK version that corresponds to .NET Runtime 8.0.14.
 
 
 ## Installation
