@@ -21,7 +21,7 @@ The API is designed following REST principles and comes with Swagger UI enabled 
 
    git clone https://github.com/Fong10921/TodoRESTApi.git
 
-   cd TodoRESTAPi
+   cd TodoRESTApi/TodoRESTApi.WebAPI
 
 2. Restore dependencies:
 
