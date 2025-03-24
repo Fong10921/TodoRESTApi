@@ -6,6 +6,12 @@ public class TodoFilters
 {
     public int? TodoId { get; set; }
     
+    public string? Name { get; set; }
+    
+    public DateTime? FromDueDate { get; set; }
+    
+    public DateTime? ToDueDate { get; set; }
+    
     public string? Category { get; set; }
     
     public TodoPriority? Priority { get; set; }

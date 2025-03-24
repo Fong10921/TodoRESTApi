@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using TodoRESTApi.Entities.Context;
 using TodoRESTApi.Entities.Entities;
@@ -39,11 +40,14 @@ public class TodoRepository: ITodoRepository
         if (todoFilters.GetAll == false &&
             string.IsNullOrEmpty(todoFilters.Category) &&
             !todoFilters.Priority.HasValue &&
-            !todoFilters.Status.HasValue)
+            !todoFilters.Status.HasValue &&
+            string.IsNullOrEmpty(todoFilters.Name) &&
+            !todoFilters.FromDueDate.HasValue &&
+            !todoFilters.ToDueDate.HasValue)
         {
-            return new List<Todo>(); 
+            return new List<Todo>();
         }
-
+        
         if (!string.IsNullOrEmpty(todoFilters.Category))
         {
             query = query.Where(todo => todo.Category == todoFilters.Category);
@@ -58,7 +62,24 @@ public class TodoRepository: ITodoRepository
         {
             query = query.Where(todo => todo.Status == todoFilters.Status.Value);
         }
+        
+        if (!string.IsNullOrEmpty(todoFilters.Name))
+        {
+            query = query.Where(todo => todo.Name.Contains(todoFilters.Name));
+        }
 
+        if (todoFilters.FromDueDate.HasValue)
+        {
+            DateTime fromDate = todoFilters.FromDueDate.Value; 
+            query = query.Where(todo => todo.DueDate >= fromDate);
+        }
+
+        if (todoFilters.ToDueDate.HasValue)
+        {
+            DateTime toDate = todoFilters.ToDueDate.Value; 
+            query = query.Where(todo => todo.DueDate < toDate);
+        }
+        
         query = query.Where(todo => todo.IsDeleted != true);
 
         // Return all todos if GetAll is true

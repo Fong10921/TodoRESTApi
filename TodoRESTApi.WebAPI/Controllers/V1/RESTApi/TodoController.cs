@@ -22,13 +22,16 @@ public class TodoController : ControllerBase
     }
 
     [HttpGet("GetTodo")]
-    public async Task<ActionResult<IEnumerable<TodoResponse>>> GetTodo([FromQuery] int? todoId,
-        [FromQuery] string? category, [FromQuery] TodoStatus? status, [FromQuery] TodoPriority? priority)
+    public async Task<ActionResult<IEnumerable<TodoResponse>>> GetTodo([FromQuery] string? name, [FromQuery] int? todoId,
+        [FromQuery] string? category, [FromQuery] TodoStatus? status, [FromQuery] TodoPriority? priority, [FromQuery] DateTime? fromDueDate, [FromQuery] DateTime? toDueDate)
     {
         TodoFilters todoFilters = new TodoFilters()
         {
             TodoId = todoId, // If todoId is provided skip other filters
+            Name = name,
             Category = category,
+            FromDueDate = fromDueDate,
+            ToDueDate = toDueDate,
             Priority = priority,
             Status = status,
             GetAll = !todoId.HasValue // If todoId is null, get all todos
