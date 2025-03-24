@@ -20,6 +20,7 @@ The API is designed following REST principles and comes with Swagger UI enabled 
 1. Clone the repository:
 
    git clone https://github.com/Fong10921/TodoRESTApi.git
+
    cd TodoRESTAPi
 
 2. Restore dependencies:
