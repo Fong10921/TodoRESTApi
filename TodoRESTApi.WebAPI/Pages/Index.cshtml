@@ -71,12 +71,60 @@
     <table class="table table-striped">
         <thead>
         <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Priority</th>
-            <th>Due Date</th>
+            <th>
+                <form method="get">
+                    <input type="hidden" asp-for="SortBy" value="@TodoSortField.Name"/>
+                    <input type="hidden" asp-for="SortDescending" value="@(!Model.SortDescending)"/>
+                    <button type="submit" class="no-style">
+                        Name @(Model.SortBy == TodoSortField.Name && Model.SortDescending ? "↓" : "↑")
+                    </button>
+                </form>
+            </th>
+            <th>
+                <form method="get">
+                    <input type="hidden" asp-for="SortBy" value="@TodoSortField.Description"/>
+                    <input type="hidden" asp-for="SortDescending" value="@(!Model.SortDescending)"/>
+                    <button type="submit" class="no-style">
+                        Description @(Model.SortBy == TodoSortField.Description && Model.SortDescending ? "↓" : "↑")
+                    </button>
+                </form>
+            </th>
+            <th>
+                <form method="get">
+                    <input type="hidden" asp-for="SortBy" value="@TodoSortField.Category"/>
+                    <input type="hidden" asp-for="SortDescending" value="@(!Model.SortDescending)"/>
+                    <button type="submit" class="no-style">
+                        Category @(Model.SortBy == TodoSortField.Category && Model.SortDescending ? "↓" : "↑")
+                    </button>
+                </form>
+            </th>
+            <th>
+                <form method="get">
+                    <input type="hidden" asp-for="SortBy" value="@TodoSortField.Status"/>
+                    <input type="hidden" asp-for="SortDescending" value="@(!Model.SortDescending)"/>
+                    <button type="submit" class="no-style">
+                        Status @(Model.SortBy == TodoSortField.Status && Model.SortDescending ? "↓" : "↑")
+                    </button>
+                </form>
+            </th>
+            <th>
+                <form method="get">
+                    <input type="hidden" asp-for="SortBy" value="@TodoSortField.Priority"/>
+                    <input type="hidden" asp-for="SortDescending" value="@(!Model.SortDescending)"/>
+                    <button type="submit" class="no-style">
+                        Priority @(Model.SortBy == TodoSortField.Priority && Model.SortDescending ? "↓" : "↑")
+                    </button>
+                </form>
+            </th>
+            <th>
+                <form method="get">
+                    <input type="hidden" asp-for="SortBy" value="@TodoSortField.DueDate"/>
+                    <input type="hidden" asp-for="SortDescending" value="@(!Model.SortDescending)"/>
+                    <button type="submit" class="no-style">
+                        Due Date @(Model.SortBy == TodoSortField.DueDate && Model.SortDescending ? "↓" : "↑")
+                    </button>
+                </form>
+            </th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -96,7 +144,7 @@
                         <div class="d-flex gap-2">
                             <a class="btn btn-sm btn-primary" href="/updateTodo/@todo.Id">Edit</a>
                             <form method="post">
-                                <input type="hidden" name="TodoId" asp-for="TodoId" value="@todo.Id" />
+                                <input type="hidden" name="TodoId" asp-for="TodoId" value="@todo.Id"/>
                                 <button type="submit" class="btn btn-sm btn-danger">
                                     Delete
                                 </button>

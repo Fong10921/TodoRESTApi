@@ -24,6 +24,9 @@ public class IndexModel : PageModel
     [BindProperty(SupportsGet = true)] public DateTime? FromDueDate { get; set; }
     [BindProperty(SupportsGet = true)] public DateTime? ToDueDate { get; set; }
 
+    [BindProperty(SupportsGet = true)] public TodoSortField? SortBy { get; set; } = TodoSortField.Name;
+    [BindProperty(SupportsGet = true)] public bool SortDescending { get; set; }
+
     public IndexModel(HttpClient httpClient)
     {
         _httpClient = httpClient;
@@ -44,6 +47,8 @@ public class IndexModel : PageModel
             { "priority", FilterPriority.HasValue ? ((int)FilterPriority.Value).ToString() : null },
             { "fromDueDate", FromDueDate?.ToString("yyyy-MM-dd HH:mm:ss") },
             { "toDueDate", ToDueDate?.ToString("yyyy-MM-dd HH:mm:ss") },
+            { "sortBy", SortBy.HasValue ? ((int)SortBy.Value).ToString() : null },
+            { "sortDescending", SortDescending.ToString() }
         };
 
         // Append query parameters dynamically

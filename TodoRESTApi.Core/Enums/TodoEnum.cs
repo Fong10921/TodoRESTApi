@@ -18,3 +18,16 @@ public enum TodoPriority
     Medium,
     High
 }
+
+[JsonConverter(typeof(JsonStringEnumConverter))] 
+public enum TodoSortField
+{
+    Name,
+    Description,
+    Category,
+    Status,
+    DueDate,
+    Priority,
+    Id // Default sort field if needed
+}
+

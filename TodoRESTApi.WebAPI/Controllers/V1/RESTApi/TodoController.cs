@@ -20,10 +20,13 @@ public class TodoController : ControllerBase
     {
         _todoService = todoService;
     }
-
+    
     [HttpGet("GetTodo")]
-    public async Task<ActionResult<IEnumerable<TodoResponse>>> GetTodo([FromQuery] string? name, [FromQuery] int? todoId,
-        [FromQuery] string? category, [FromQuery] TodoStatus? status, [FromQuery] TodoPriority? priority, [FromQuery] DateTime? fromDueDate, [FromQuery] DateTime? toDueDate)
+    public async Task<ActionResult<IEnumerable<TodoResponse>>> GetTodo([FromQuery] string? name,
+        [FromQuery] int? todoId,
+        [FromQuery] string? category, [FromQuery] TodoStatus? status, [FromQuery] TodoPriority? priority,
+        [FromQuery] DateTime? fromDueDate, [FromQuery] DateTime? toDueDate, [FromQuery] TodoSortField? sortBy,
+        [FromQuery] bool? sortDescending)
     {
         TodoFilters todoFilters = new TodoFilters()
         {
@@ -33,6 +36,8 @@ public class TodoController : ControllerBase
             FromDueDate = fromDueDate,
             ToDueDate = toDueDate,
             Priority = priority,
+            SortBy = sortBy,
+            SortDescending = sortDescending != null && (bool)sortDescending,
             Status = status,
             GetAll = !todoId.HasValue // If todoId is null, get all todos
         };
@@ -50,7 +55,7 @@ public class TodoController : ControllerBase
         // Status 201 Created
         return CreatedAtAction(nameof(GetTodo), new { todoId = todoAddResponse.Id }, todoAddResponse);
     }
-    
+
     [HttpPatch("PatchTodo")]
     public async Task<ActionResult<TodoResponse>> PatchTodo([FromBody] TodoUpdateRequest todoData)
     {
@@ -62,9 +67,9 @@ public class TodoController : ControllerBase
         }
 
         // Status 200 Created
-        return Ok(updatedTodo); 
+        return Ok(updatedTodo);
     }
-    
+
     [HttpPatch("SoftDeleteTodo")]
     public async Task<ActionResult> SoftDeleteTodo([FromQuery] int todoId)
     {
@@ -77,7 +82,7 @@ public class TodoController : ControllerBase
 
         return Ok($"Todo with ID {todoId} has been soft deleted.");
     }
-    
+
     [HttpDelete("DestroyTodo")]
     public async Task<ActionResult> DestroyTodo([FromQuery] int todoId)
     {
@@ -90,5 +95,4 @@ public class TodoController : ControllerBase
 
         return Ok($"Todo with ID {todoId} has been destroy.");
     }
-    
 }

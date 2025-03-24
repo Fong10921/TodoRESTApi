@@ -65,7 +65,7 @@ public static class ConfigureServicesExtension
 
         // Register Swagger generator for API documentation
         serviceCollection.AddSwaggerGen();
-
+        
         // Add Razor Page 
         serviceCollection.AddRazorPages();
 

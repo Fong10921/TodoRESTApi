@@ -1,5 +1,6 @@
 using System.Globalization;
 using Microsoft.EntityFrameworkCore;
+using TodoRESTApi.Core.Enums;
 using TodoRESTApi.Entities.Context;
 using TodoRESTApi.Entities.Entities;
 using TodoRESTApi.RepositoryContracts;
@@ -81,6 +82,53 @@ public class TodoRepository: ITodoRepository
         }
         
         query = query.Where(todo => todo.IsDeleted != true);
+        
+        if (todoFilters.SortBy.HasValue)
+        {
+            switch (todoFilters.SortBy)
+            {
+                case TodoSortField.Name:
+                    query = todoFilters.SortDescending 
+                        ? query.OrderByDescending(todo => todo.Name) 
+                        : query.OrderBy(todo => todo.Name);
+                    break;
+                case TodoSortField.Description:
+                    query = todoFilters.SortDescending 
+                        ? query.OrderByDescending(todo => todo.Description) 
+                        : query.OrderBy(todo => todo.Description);
+                    break;
+                case TodoSortField.Category:
+                    query = todoFilters.SortDescending 
+                        ? query.OrderByDescending(todo => todo.Category) 
+                        : query.OrderBy(todo => todo.Category);
+                    break;
+                case TodoSortField.Status:
+                    query = todoFilters.SortDescending 
+                        ? query.OrderByDescending(todo => todo.Status) 
+                        : query.OrderBy(todo => todo.Status);
+                    break;
+                case TodoSortField.DueDate:
+                    query = todoFilters.SortDescending 
+                        ? query.OrderByDescending(todo => todo.DueDate) 
+                        : query.OrderBy(todo => todo.DueDate);
+                    break;
+                case TodoSortField.Priority:
+                    query = todoFilters.SortDescending 
+                        ? query.OrderByDescending(todo => todo.Priority) 
+                        : query.OrderBy(todo => todo.Priority);
+                    break;
+                default:
+                    query = query.OrderBy(todo => todo.Id);
+                    break;
+            }
+        }
+        else
+        {
+            // Default sort if no valid SortBy is provided.
+            query = query.OrderByDescending(todo => todo.Name);
+        }
+
+        
 
         // Return all todos if GetAll is true
         return await query.ToListAsync();
