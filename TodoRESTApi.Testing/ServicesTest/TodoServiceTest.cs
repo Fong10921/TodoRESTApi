@@ -301,18 +301,18 @@ public class TodoServiceTest
         await action.Should().ThrowAsync<ArgumentNullException>();
     }
 
-    // When we supply invalid PersonId as PersonUpdateRequest, it should throw ArgumentNullException
+    // When we supply invalid PersonId as PersonUpdateRequest, it should return null
     [Fact]
-    public async Task UpdatePerson_InvalidPersonId_ToBeArgumentNullException()
+    public async Task UpdatePerson_InvalidPersonId_ToBeNull()
     {
         // Arrange
         TodoUpdateRequest todoUpdateRequest = _fixture.Build<TodoUpdateRequest>().Create();
 
         // Act
-        Func<Task> action = async () => { await _todoService.UpdateTodo(todoUpdateRequest); };
+        TodoResponse? todoResponse = await _todoService.UpdateTodo(todoUpdateRequest);
 
         // Assert
-        await action.Should().ThrowAsync<ArgumentException>();
+        todoResponse.Should().BeNull();
     }
 
 
@@ -351,18 +351,18 @@ public class TodoServiceTest
         await action.Should().ThrowAsync<ArgumentNullException>();
     }
     
-    //When we supply invalid value as todoID. it should throw ArgumentException
+    //When we supply invalid value as todoID. it should return false
     [Fact]
-    public async Task SoftDeleteTodo_InvalidTodoId_ToBeArgumentException()
+    public async Task SoftDeleteTodo_InvalidTodoId_ToBeFalse()
     {
         //Arrange
         int? todoId = -1;
 
         //Act
-        Func<Task> action = async () => { await _todoService.SoftDeleteTodo(todoId); };
+        bool todoResponse = await _todoService.SoftDeleteTodo(todoId);
 
         //Assert
-        await action.Should().ThrowAsync<ArgumentException>();
+        todoResponse.Should().BeFalse();
     }
     
     //When we supply valid value as todoID. it should successful soft-delete the todo
@@ -401,18 +401,18 @@ public class TodoServiceTest
         await action.Should().ThrowAsync<ArgumentNullException>();
     }
     
-    //When we supply invalid value as todoID. it should throw ArgumentException
+    //When we supply invalid value as todoID. it should return false
     [Fact]
-    public async Task DestroyTodo_InvalidTodoId_ToBeArgumentException()
+    public async Task DestroyTodo_InvalidTodoId_ToBeFalse()
     {
         //Arrange
         int? todoId = -1;
 
         //Act
-        Func<Task> action = async () => { await _todoService.DestroyTodo(todoId); };
+        bool todoResponse = await _todoService.DestroyTodo(todoId);
 
         //Assert
-        await action.Should().ThrowAsync<ArgumentException>();
+        todoResponse.Should().BeFalse();
     }
     
     //When we supply valid value as todoID. it should successful destroy the todo

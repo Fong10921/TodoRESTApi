@@ -1,5 +1,7 @@
 using Asp.Versioning.ApiExplorer;
 using TodoRESTApi.WebAPI.StartupExtensions;
+using TodoRESTApi.Entities.Context;
+using TodoRESTApi.identity.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,8 +37,11 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.MapRazorPages();
+
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

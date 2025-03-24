@@ -1,0 +1,69 @@
+@page "/updateTodo/{id:int}"
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using TodoRESTApi.Core.Enums
+@model TodoRESTApi.WebAPI.Pages.UpdateTodoModel
+
+@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<h2>Update a Todo</h2>
+<form method="post">
+    <div class="mb-3">
+        <label asp-for="TodoUpdateRequest.Name" class="form-label"></label>
+        <input asp-for="TodoUpdateRequest.Name" class="form-control" />
+        <span asp-validation-for="TodoUpdateRequest.Name" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="TodoUpdateRequest.Description" class="form-label"></label>
+        <textarea asp-for="TodoUpdateRequest.Description" class="form-control"></textarea>
+        <span asp-validation-for="TodoUpdateRequest.Description" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="TodoUpdateRequest.DueDate" class="form-label"></label>
+        <input asp-for="TodoUpdateRequest.DueDate" class="form-control" type="datetime-local" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+        <span asp-validation-for="TodoUpdateRequest.DueDate" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="TodoUpdateRequest.Status" class="form-label"></label>
+        <select asp-for="TodoUpdateRequest.Status" class="form-select">
+            <option value="">Select Status</option>
+            @foreach (var status in Enum.GetValues(typeof(TodoStatus)))
+            {
+                <option value="@status" selected="@(status.Equals(Model.TodoUpdateRequest.Status) ? "selected" : null)">
+                    @status
+                </option>
+            }
+        </select>
+        <span asp-validation-for="TodoUpdateRequest.Status" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TodoUpdateRequest.Priority" class="form-label"></label>
+        <select asp-for="TodoUpdateRequest.Priority" class="form-select">
+            <option value="">Select Priority</option>
+            @foreach (var priority in Enum.GetValues(typeof(TodoPriority)))
+            {
+                <option value="@priority" selected="@(priority.Equals(Model.TodoUpdateRequest.Priority) ? "selected" : null)">
+                    @priority
+                </option>
+            }
+        </select>
+        <span asp-validation-for="TodoUpdateRequest.Priority" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TodoUpdateRequest.Category" class="form-label"></label>
+        <input asp-for="TodoUpdateRequest.Category" class="form-control" />
+        <span asp-validation-for="TodoUpdateRequest.Category" class="text-danger"></span>
+    </div>
+    <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary">Update Todo</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+

@@ -14,7 +14,7 @@ public class TodoUpdateRequest
     
     [Required(ErrorMessage = "The Name field is required.")]
     [MaxLength(100, ErrorMessage = "Name can't exceed 100 characters")]
-    public string Name { get; set; }
+    public string Name { get; set; } = null!;
         
     [MaxLength(500, ErrorMessage = "Description can't exceed 500 characters")]
     public string? Description { get; set; }

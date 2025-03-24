@@ -11,10 +11,10 @@ public class Todo
 {
     [Required]
     public int Id { get; set; }
-    
+
     [Required(ErrorMessage = "The Name field is required.")]
     [MaxLength(100, ErrorMessage = "Name can't exceed 100 characters")]
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
     
     [MaxLength(500, ErrorMessage = "Description can't exceed 100 characters")]
     public string? Description { get; set; }

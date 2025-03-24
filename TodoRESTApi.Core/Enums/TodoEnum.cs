@@ -1,30 +1,20 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Text.Json.Serialization;
 
 namespace TodoRESTApi.Core.Enums;
 
+[JsonConverter(typeof(JsonStringEnumConverter))] 
 public enum TodoStatus
 {
-    [Display(Name = "Pending Task")]
     Pending,
-
-    [Display(Name = "In Progress")]
     InProgress,
-
-    [Display(Name = "Completed Task")]
     Completed,
-
-    [Display(Name = "Archived Task")]
     Archived
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))] 
 public enum TodoPriority
 {
-    [Display(Name = "Low Priority")]
     Low,
-
-    [Display(Name = "Medium Priority")]
     Medium,
-
-    [Display(Name = "High Priority")]
     High
 }

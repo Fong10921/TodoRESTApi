@@ -52,6 +52,9 @@ public class TodoService: ITodoService
             throw new ArgumentNullException(nameof(todoUpdateRequest));
         }
         
+        // Model Validation
+        ValidationHelper.ModelValidation(todoUpdateRequest);
+        
         TodoResponse? todoResponse = await _todoRepository.UpdateTodo(todoUpdateRequest);
 
         if (todoResponse == null)

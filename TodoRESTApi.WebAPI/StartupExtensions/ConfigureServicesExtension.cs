@@ -21,9 +21,10 @@ public static class ConfigureServicesExtension
         // Add services to the container.
         serviceCollection.AddControllersWithViews();
 
-        // Add Controllers to the Dependency Injection
+        // Add Controllers to the Dependency Injection, Add Json to Serialize Enums as Strings
         serviceCollection.AddControllers();
         
+        // Use the app.db as Db when environment is not Test
         if (environment.IsEnvironment("Test") == false)
         {
             serviceCollection.AddDbContext<TodoDbContext>(optionsBuilder =>
@@ -42,7 +43,7 @@ public static class ConfigureServicesExtension
             }).AddEntityFrameworkStores<TodoDbContext>().AddDefaultTokenProviders()
             .AddUserStore<UserStore<ApplicationUser, ApplicationRole, TodoDbContext, Guid>>()
             .AddRoleStore<RoleStore<ApplicationRole, TodoDbContext, Guid>>();
-
+        
         // Add Api Versioning to the Dependency Injection
         serviceCollection.AddApiVersioning(options =>
         {
@@ -64,6 +65,12 @@ public static class ConfigureServicesExtension
 
         // Register Swagger generator for API documentation
         serviceCollection.AddSwaggerGen();
+
+        // Add Razor Page 
+        serviceCollection.AddRazorPages();
+
+        // Add HttpClient to the Dependency Injection
+        serviceCollection.AddHttpClient();
         
         // Add the TodoService and TodoRepository to the Dependency Injection
         serviceCollection.AddScoped<ITodoRepository, TodoRepository>();

@@ -17,7 +17,6 @@ public class TodoRepository: ITodoRepository
         _db = db;
     }
     
-    
     public async Task<Todo> AddTodo(Todo todo)
     {
         _db.Todo.Add(todo);
@@ -72,7 +71,7 @@ public class TodoRepository: ITodoRepository
 
         if (existingTodo == null)
         {
-            throw new ArgumentException(nameof(todoUpdateRequest));
+            return null; // Return null if the todo doesn't exist
         }
         
         existingTodo.Name = todoUpdateRequest.Name;
@@ -94,7 +93,7 @@ public class TodoRepository: ITodoRepository
         
         if (existingTodo == null)
         {
-            throw new ArgumentException($"Todo with ID {todoId} not found");
+            return false;
         }
 
         existingTodo.IsDeleted = true;
@@ -109,7 +108,7 @@ public class TodoRepository: ITodoRepository
 
         if (existingTodo == null)
         {
-            throw new ArgumentException($"Todo with ID {todoId} not found");
+            return false;
         }
 
         _db.Todo.Remove(existingTodo); 
