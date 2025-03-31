@@ -1,17 +1,19 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TodoRESTApi.Core.Enums;
-using TodoRESTApi.Core.Models;
 using TodoRESTApi.ServiceContracts;
 using TodoRESTApi.ServiceContracts.DTO.Request;
 using TodoRESTApi.ServiceContracts.DTO.Response;
 using TodoRESTApi.ServiceContracts.Filters;
+using TodoRESTApi.WebAPI.CustomAttributes;
 
 namespace TodoRESTApi.WebAPI.Controllers.V1.RESTApi;
 
 [ApiController]
 [Route("api/v{version:apiVersion}")]
 [ApiVersion("1.0")]
+[Authorize] 
 public class TodoController : ControllerBase
 {
     private readonly ITodoService _todoService;
@@ -22,11 +24,12 @@ public class TodoController : ControllerBase
     }
     
     [HttpGet("GetTodo")]
+    [AuthorizeOr("Permission:Todo:CanView", "Permission:Todo:CanEdit")]
     public async Task<ActionResult<IEnumerable<TodoResponse>>> GetTodo([FromQuery] string? name,
         [FromQuery] int? todoId,
         [FromQuery] string? category, [FromQuery] TodoStatus? status, [FromQuery] TodoPriority? priority,
         [FromQuery] DateTime? fromDueDate, [FromQuery] DateTime? toDueDate, [FromQuery] TodoSortField? sortBy,
-        [FromQuery] bool? sortDescending)
+        [FromQuery] bool? sortDescending, [FromQuery] string? timeZone)
     {
         TodoFilters todoFilters = new TodoFilters()
         {
@@ -37,6 +40,7 @@ public class TodoController : ControllerBase
             ToDueDate = toDueDate,
             Priority = priority,
             SortBy = sortBy,
+            TimeZone = timeZone,
             SortDescending = sortDescending != null && (bool)sortDescending,
             Status = status,
             GetAll = !todoId.HasValue // If todoId is null, get all todos
@@ -66,7 +70,7 @@ public class TodoController : ControllerBase
             return NotFound($"Todo with ID {todoData.Id} not found.");
         }
 
-        // Status 200 Created
+        // Status 200 
         return Ok(updatedTodo);
     }
 
@@ -94,5 +98,11 @@ public class TodoController : ControllerBase
         }
 
         return Ok($"Todo with ID {todoId} has been destroy.");
+    }
+    
+    [HttpGet("TestAuth")]
+    public IActionResult TestAuth()
+    {
+        return Ok(new { User = User.Identity.Name, IsAuthenticated = User.Identity.IsAuthenticated });
     }
 }

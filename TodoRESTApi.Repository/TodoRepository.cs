@@ -1,4 +1,3 @@
-using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using TodoRESTApi.Core.Enums;
 using TodoRESTApi.Entities.Context;
@@ -127,9 +126,8 @@ public class TodoRepository: ITodoRepository
             // Default sort if no valid SortBy is provided.
             query = query.OrderByDescending(todo => todo.Name);
         }
-
         
-
+        
         // Return all todos if GetAll is true
         return await query.ToListAsync();
     }

@@ -23,6 +23,10 @@ public class Todo
     [DataType(DataType.Date)]
     public DateTime DueDate { get; set; }
     
+    [Required] 
+    [MaxLength(200)]
+    public string TimeZone { get; set; } = null!;
+    
     [Required(ErrorMessage = "The Status field is required.")]
     [EnumDataType(typeof(TodoStatus), ErrorMessage = "Invalid Todo Status")]
     public TodoStatus Status { get; set; } = TodoStatus.Pending;

@@ -20,6 +20,10 @@ public class Todo
     [Required]
     public DateTime DueDate { get; set; }
 
+    [Required] 
+    [MaxLength(200)]
+    public string TimeZone { get; set; } = null!;
+
     [Required]
     public TodoStatus Status { get; set; } = TodoStatus.Pending;
     

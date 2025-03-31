@@ -1,18 +1,22 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using TodoRESTApi.ServiceContracts.DTO.Request;
 
 namespace TodoRESTApi.WebAPI.Pages;
 
+[Authorize(Policy = "Permission:Todo:CanCreate")]
 public class CreateTodoModel : PageModel
 {
     private readonly HttpClient _httpClient;
+    private readonly ILogger<CreateTodoModel> _logger;
     
-    public CreateTodoModel(HttpClient httpClient)
+    public CreateTodoModel(HttpClient httpClient, ILogger<CreateTodoModel> logger)
     {
         _httpClient = httpClient;
+        _logger = logger;
     }
     
     [BindProperty]

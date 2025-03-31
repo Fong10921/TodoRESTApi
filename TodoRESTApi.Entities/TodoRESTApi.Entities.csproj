@@ -24,4 +24,10 @@
       <ProjectReference Include="..\TodoRESTApi.identity\TodoRESTApi.identity.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Update="Migrations\20250326005149_AddTimeZoneToTodoEntities.cs">
+        <DependentUpon>20250331014642_AddMetaRole.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
 </Project>

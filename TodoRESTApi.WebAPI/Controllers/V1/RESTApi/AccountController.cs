@@ -24,7 +24,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApplicationUser>> PostRegister(RegisterDTO registerDto)
+    public async Task<ActionResult<ApplicationUser>> PostRegister(RegisterDto registerDto)
     {
         if (ModelState.IsValid == false)
         {
@@ -58,7 +58,7 @@ public class AccountController : ControllerBase
     }
     
     [HttpPost("login")]
-    public async Task<IActionResult> PostLogin(LoginDTO loginDto)
+    public async Task<IActionResult> PostLogin(LoginDto loginDto)
     {
         if (ModelState.IsValid == false)
         {

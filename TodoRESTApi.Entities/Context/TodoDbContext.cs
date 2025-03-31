@@ -8,6 +8,7 @@ namespace TodoRESTApi.Entities.Context;
 public class TodoDbContext: IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
     public virtual DbSet<Todo> Todo { get; set; }
+    public virtual DbSet<MetaRole> MetaRoles { get; set; }
     
     public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options)
     {

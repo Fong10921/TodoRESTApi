@@ -13,6 +13,7 @@ public class TodoFilters
     public TodoStatus? Status { get; set; }
     public TodoSortField? SortBy { get; set; }
     public bool SortDescending { get; set; }
+    public string? TimeZone { get; set; }
 
     /// <summary>
     /// Determines if all todos should be fetched when no filters are provided.

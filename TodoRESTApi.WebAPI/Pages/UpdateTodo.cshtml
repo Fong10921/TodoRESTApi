@@ -21,7 +21,9 @@
     </div>
     <div class="mb-3">
         <label asp-for="TodoUpdateRequest.DueDate" class="form-label"></label>
-        <input asp-for="TodoUpdateRequest.DueDate" class="form-control" type="datetime-local" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+        <input asp-for="TodoUpdateRequest.DueDate" class="form-control" type="datetime-local"/>
+        <input asp-for="TodoUpdateRequest.TimeZone" type="hidden" id="userTimeZone" value="" />
+        <span asp-validation-for="TodoUpdateRequest.TimeZone" class="text-danger"></span>
         <span asp-validation-for="TodoUpdateRequest.DueDate" class="text-danger"></span>
     </div>
     <div class="mb-3">

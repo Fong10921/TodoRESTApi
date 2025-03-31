@@ -1,0 +1,43 @@
+@page "/Role/CreateRole"
+@using System.ComponentModel.DataAnnotations
+@using System.Reflection
+@using TodoRESTApi.identity.Enums
+@model CreateRole
+
+@{
+    ViewBag.Title = "Create Role";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="mb-4">Create a New Role</h2>
+            <form method="post">
+                <div class="form-group">
+                    <label asp-for="CreateRoleDto.RoleName" class="control-label"></label>
+                    <input type="text" asp-for="CreateRoleDto.RoleName" class="form-control" placeholder="Enter Role Name" />
+                    <span asp-validation-for="CreateRoleDto.RoleName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="CreateRoleDto.RoleType" class="form-label"></label>
+                    <select asp-for="CreateRoleDto.RoleType" class="form-select">
+                        <option value="">Select Role Type</option>
+                        @foreach (var status in Enum.GetValues(typeof(RoleType)))
+                        {
+                            var displayName = status.GetType()
+                                .GetMember(status.ToString())
+                                .First()
+                                .GetCustomAttribute<DisplayAttribute>()?
+                                .Name ?? status.ToString();
+                            
+                            <option value="@status">@displayName</option>
+                        }
+                    </select>
+                    <span asp-validation-for="CreateRoleDto.RoleType" class="text-danger"></span>
+                </div>
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <button type="submit" class="btn btn-primary mt-3">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TodoRESTApi.identity.DTO;
 
-public class RegisterDTO
+public class RegisterDto
 {
     [Required(ErrorMessage = "Person Name can't be blank")]
     public string PersonName { get; set; } = string.Empty;
@@ -12,7 +12,7 @@ public class RegisterDTO
     public string Email { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Phone number can't be blank")]
-    [RegularExpression("^[0-9]*$", ErrorMessage = "Email should be in a proper phone number format")]
+    [RegularExpression("^[0-9]*$", ErrorMessage = "Phone Number should be in a proper phone number format")]
     public string PhoneNumber { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Password can't be blank")]

@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
@@ -8,13 +9,14 @@ using TodoRESTApi.ServiceContracts.DTO.Response;
 
 namespace TodoRESTApi.WebAPI.Pages;
 
+[Authorize(Policy = "Permission:Todo:EditView")]
 public class UpdateTodoModel : PageModel
 {
     private readonly HttpClient _httpClient;
 
-    public UpdateTodoModel(HttpClient httpClient)
+    public UpdateTodoModel(IHttpClientFactory httpClientFactory)
     {
-        _httpClient = httpClient;
+        _httpClient = httpClientFactory.CreateClient("WithCookies");
     }
 
     [BindProperty] public TodoUpdateRequest TodoUpdateRequest { get; set; } = new TodoUpdateRequest();
@@ -51,6 +53,7 @@ public class UpdateTodoModel : PageModel
                     TodoUpdateRequest.Status = todoResponse.Status;
                     TodoUpdateRequest.DueDate = todoResponse.DueDate;
                     TodoUpdateRequest.Category = todoResponse.Category;
+                    TodoUpdateRequest.TimeZone = todoResponse.TimeZone;
                 }
             }
         }

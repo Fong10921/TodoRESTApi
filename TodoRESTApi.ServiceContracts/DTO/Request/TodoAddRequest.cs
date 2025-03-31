@@ -19,6 +19,10 @@ public class TodoAddRequest
     [Required(ErrorMessage = "The Due Date field is required.")]
     [DataType(DataType.Date)]
     public DateTime DueDate { get; set; }
+
+    [Required]
+    [DataType(DataType.Text)]
+    public string TimeZone { get; set; } = null!;
         
     [Required(ErrorMessage = "The Status field is required.")]
     [EnumDataType(typeof(TodoStatus), ErrorMessage = "Invalid Todo Status")]
@@ -45,6 +49,7 @@ public class TodoAddRequest
             Status = this.Status,
             Priority = this.Priority,
             Category = this.Category,
+            TimeZone = this.TimeZone,
             IsDeleted = false
         };
     }

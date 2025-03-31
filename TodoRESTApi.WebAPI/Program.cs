@@ -1,12 +1,26 @@
 using Asp.Versioning.ApiExplorer;
+using Elastic.CommonSchema.Serilog;
+using Elastic.Ingest.Elasticsearch;
+using Elastic.Ingest.Elasticsearch.DataStreams;
+using Elastic.Serilog.Sinks;
+using Elastic.Transport;
+using Hangfire;
+using Serilog;
 using TodoRESTApi.WebAPI.StartupExtensions;
-using TodoRESTApi.Entities.Context;
-using TodoRESTApi.identity.Identity;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Offload the Dependency Injection to the ConfigureServicesExtension
 builder.Services.ConfigureServices(builder.Configuration, builder.Environment);
+
+// Use Serilog as a Host
+builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider services,
+    LoggerConfiguration loggerConfiguration) =>
+{
+    loggerConfiguration.ReadFrom.Configuration(context.Configuration).ReadFrom.Services(services);
+});
+
 
 var app = builder.Build();
 
@@ -34,8 +48,21 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseSerilogRequestLogging(); // Use the Serilog to log the request as a middleware
+
+// Enable Content Security Policy (CSP) to block inline scripts:
+/*app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("Content-Security-Policy", "default-src 'self'; script-src 'self'");
+    await next();
+});*/
+
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// Add Background Jobs Dashboard
+app.UseHangfireDashboard("/hangfire"); 
 
 app.MapRazorPages();
 
@@ -43,6 +70,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseHeaderPropagation();
 
 app.MapControllerRoute(
     name: "default",
