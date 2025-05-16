@@ -1,0 +1,21 @@
+@page "/RateLimitExceeded"
+@model RateLimitExceeded
+
+@{
+    Layout = null; // Or null if you want standalone
+    ViewData["Title"] = "Too Many Requests";
+}
+
+<div class="container mt-5">
+    <div class="alert alert-warning text-center shadow p-4 rounded-3">
+        <h1 class="display-4 mb-3">
+            <i class="bi bi-exclamation-triangle-fill text-warning"></i> Too Many Requests
+        </h1>
+        <p class="lead">Whoa! You're sending requests a bit too fast.</p>
+        <p>Please wait a moment before trying again.</p>
+
+        <a href="/" class="btn btn-primary mt-3">
+            Back to Home
+        </a>
+    </div>
+</div>

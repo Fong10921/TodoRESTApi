@@ -4,27 +4,31 @@ using Microsoft.Extensions.Logging;
 using TodoRESTApi.identity.DTO;
 using TodoRESTApi.identity.Enums;
 using TodoRESTApi.identity.Identity;
-using TodoRESTApi.identity.ServiceContracts;
 using TodoRESTApi.RepositoryContracts;
+using TodoRESTApi.Service.Helpers;
+using TodoRESTApi.ServiceContracts;
+using TodoRESTApi.ServiceContracts.DTO.Response;
+using TodoRESTApi.ServiceContracts.Filters;
 
 namespace TodoRESTApi.Service;
 
 public class RoleService : IRoleService
 {
-    private readonly RoleManager<ApplicationRole> _roleManager;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IMetaRoleRepository _metaRoleRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly IRoleRepository _roleRepository;
+    private readonly ISignInRepository _signInRepository;
     private readonly ILogger<RoleService> _logger;
 
-    public RoleService(RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager, ILogger<RoleService> logger, IMetaRoleRepository metaRoleRepository)
+    public RoleService(
+        ILogger<RoleService> logger, IMetaRoleRepository metaRoleRepository, IUserRepository userRepository,
+        IRoleRepository roleRepository, ISignInRepository signInRepository)
     {
-        _roleManager = roleManager;
-        _userManager = userManager;
-        _signInManager = signInManager;
         _logger = logger;
         _metaRoleRepository = metaRoleRepository;
+        _userRepository = userRepository;
+        _roleRepository = roleRepository;
+        _signInRepository = signInRepository;
     }
 
     public async Task<IdentityResult> CreateRoleAsync(CreateRoleDto createRoleDto)
@@ -34,6 +38,8 @@ public class RoleService : IRoleService
         {
             throw new ArgumentNullException(nameof(createRoleDto), "Role data cannot be null.");
         }
+        
+        ValidationHelper.ModelValidation(createRoleDto);
 
         try
         {
@@ -42,14 +48,17 @@ public class RoleService : IRoleService
                 Name = createRoleDto.RoleName,
                 RoleType = createRoleDto.RoleType
             };
-
-            IdentityResult result = await _roleManager.CreateAsync(role);
-
-            if (!result.Succeeded)
+            
+            if (createRoleDto.RoleType != RoleType.MetaLevel)
             {
-                return result; // Return the failure result with errors
+                IdentityResult result = await _roleRepository.CreateRole(role);
+                
+                if (!result.Succeeded)
+                {
+                    return result; // Return the failure result with errors
+                }
             }
-
+            
             if (createRoleDto.RoleType == RoleType.PageLevel)
             {
                 var claims = new List<Claim>
@@ -63,22 +72,18 @@ public class RoleService : IRoleService
 
                 foreach (var claim in claims)
                 {
-                    var claimResult = await _roleManager.AddClaimAsync(role, claim);
+                    var claimResult = await _roleRepository.AddClaimAsync(role, claim);
                     if (!claimResult.Succeeded)
                     {
                         return claimResult; // Return the failure if adding claims fails
                     }
                 }
-            }  else if (createRoleDto.RoleType == RoleType.MetaLevel)
+            }
+            else if (createRoleDto.RoleType == RoleType.MetaLevel)
             {
                 MetaRole metaRole = createRoleDto.ToMetaRole();
 
-                if (metaRole == null)
-                {
-                    return IdentityResult.Failed(new IdentityError { Description = "Failed to convert CreateRoleDto to MetaRole." });
-                }
-
-                MetaRole resultAddingMetaRole = await _metaRoleRepository.AddMetaRole(metaRole);
+                MetaRole? resultAddingMetaRole = await _metaRoleRepository.AddMetaRole(metaRole);
 
                 if (resultAddingMetaRole == null)
                 {
@@ -88,12 +93,10 @@ public class RoleService : IRoleService
                 return IdentityResult.Success; // Successfully created a meta role
             }
 
-
             return IdentityResult.Success; // Return success if everything goes well
         }
         catch (Exception ex)
-        {
-            // Log the exception if you have a logging framework (e.g., Serilog, ILogger)
+        { 
             Console.WriteLine($"Error creating role: {ex.Message}");
 
             // Return a failure result with exception message
@@ -101,61 +104,106 @@ public class RoleService : IRoleService
                 { Description = "An unexpected error occurred while creating the role." });
         }
     }
+
     public async Task<IdentityResult> AssignRoleToUser(AssignRoleToUserDto assignRoleToUserDto)
     {
-        var user = await _userManager.FindByIdAsync(assignRoleToUserDto.UserId);
-        if (user == null)
+        // Validate input
+        if (assignRoleToUserDto == null)
         {
-            return IdentityResult.Failed(new IdentityError
-                { Description = $"User with ID '{assignRoleToUserDto.UserId}' not found." });
+            throw new ArgumentNullException(nameof(assignRoleToUserDto), "Assign Role To User DTO data cannot be null.");
         }
+        
+        ValidationHelper.ModelValidation(assignRoleToUserDto);
 
-        var role = await _roleManager.FindByIdAsync(assignRoleToUserDto.RoleId);
-        if (role == null)
+        try
         {
-            return IdentityResult.Failed(new IdentityError
-                { Description = $"Role with ID '{assignRoleToUserDto.RoleId}' not found." });
-        }
-
-        // Check if user is already in the role
-        if (role.Name != null && await _userManager.IsInRoleAsync(user, role.Name))
-        {
-            return IdentityResult.Failed(new IdentityError
-                { Description = $"User is already in the role '{role.Name}'." });
-        }
-
-        // Assign the role
-        if (role.Name != null)
-        {
-            var result = await _userManager.AddToRoleAsync(user, role.Name);
-            if (!result.Succeeded)
+            var user = await _userRepository.FindUserByIdAsync(assignRoleToUserDto.UserId);
+        
+            if (user == null)
             {
-                return IdentityResult.Failed(result.Errors.ToArray());
+                return IdentityResult.Failed(new IdentityError
+                    { Description = $"User with ID '{assignRoleToUserDto.UserId}' not found." });
             }
-        }
 
-        return IdentityResult.Success;
+            var role = await _roleRepository.FindRoleByIdAsync(assignRoleToUserDto.RoleId);
+
+            if (role == null)
+            {
+                MetaRole? metaRole = await _metaRoleRepository.GetMetaRoleBasedOnId(Guid.Parse(assignRoleToUserDto.RoleId));
+
+                if (metaRole == null)
+                {
+                    return IdentityResult.Failed(new IdentityError
+                        { Description = "Failed to convert CreateRoleDto to MetaRole." });
+                }
+
+                user.MetaRoleId = metaRole.Id;
+
+                IdentityResult? resultUpdateUser = await _userRepository.UpdateUserAsync(user);
+
+                if (resultUpdateUser == null)
+                {
+                    return IdentityResult.Failed(new IdentityError { Description = "Failed to assign meta role to user." });
+                }
+            }
+            else
+            {
+                // Check if user is already in the role
+                if (role.Name != null && await _userRepository.IsUserInRoleAsync(user, role.Name))
+                {
+                    return IdentityResult.Failed(new IdentityError
+                        { Description = $"User is already in the role '{role.Name}'." });
+                }
+
+                // Assign the role
+                if (role.Name != null)
+                {
+                    var result = await _userRepository.AddUserToRoleAsync(user, role.Name);
+                    if (!result.Succeeded)
+                    {
+                        return IdentityResult.Failed(result.Errors.ToArray());
+                    }
+                }
+            }
+
+            return IdentityResult.Success;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error assigning role to user: {ex.Message}");
+
+            // Return a failure result with exception message
+            return IdentityResult.Failed(new IdentityError
+                { Description = "An unexpected error occurred while assigning role to user." });
+        }
     }
+
     public async Task<IdentityResult> RefreshUser(ClaimsPrincipal applicationUser)
     {
+        // Validate input
+        if (applicationUser == null)
+        {
+            throw new ArgumentNullException(nameof(applicationUser), "Refresh User ClaimsPrincipal cannot be null.");
+        }
+        
         try
         {
             // Get user from claims
-            var user = await _userManager.GetUserAsync(applicationUser);
+            var user = await _userRepository.GetUserUsingClaimPrinciple(applicationUser);
             if (user == null)
             {
                 return IdentityResult.Failed(new IdentityError { Description = "User not found." });
             }
 
             // Update security stamp
-            var securityStampResult = await _userManager.UpdateSecurityStampAsync(user);
+            var securityStampResult = await _userRepository.UpdateSecurityStampAsync(user);
             if (!securityStampResult.Succeeded)
             {
                 return IdentityResult.Failed(securityStampResult.Errors.ToArray());
             }
 
             // Refresh sign-in
-            await _signInManager.RefreshSignInAsync(user);
+            await _signInRepository.RefreshSignInUser(user);
 
             return IdentityResult.Success;
         }
@@ -166,20 +214,17 @@ public class RoleService : IRoleService
             return IdentityResult.Failed(new IdentityError { Description = $"An error occurred: {ex.Message}" });
         }
     }
-    public async Task<IdentityResult> AssignClaimToRole(AssignClaimToRoleDto assignClaimToRoleDto)
-    {
-        if (assignClaimToRoleDto?.RolePermissionClaimDtos == null)
-        {
-            return IdentityResult.Failed(new IdentityError { Description = "Invalid request data." });
-        }
 
+    public async Task<IdentityResult> AssignClaimToRole(AssignClaimToRoleDtoRequest assignClaimToRoleDtoRequest)
+    {
         try
         {
-            List<IdentityError> errors = new List<IdentityError>();
+            var errors = new List<IdentityError>();
 
-            foreach (var rolePermissionClaimDto in assignClaimToRoleDto.RolePermissionClaimDtos)
+            Guid metaRoleId = Guid.Empty;
+            foreach (var rolePermissionClaimDto in assignClaimToRoleDtoRequest.RolePermissionClaimDtos)
             {
-                ApplicationRole? role = await _roleManager.FindByNameAsync(rolePermissionClaimDto.RoleName);
+                var role = await _roleRepository.FindRoleByNameAsync(rolePermissionClaimDto.RoleName);
                 if (role == null)
                 {
                     errors.Add(new IdentityError
@@ -187,10 +232,18 @@ public class RoleService : IRoleService
                     continue;
                 }
 
-                // Retrieve existing claims for the role
-                var existingClaims = await _roleManager.GetClaimsAsync(role);
+                // Try parsing MetaRole ID
+                if (assignClaimToRoleDtoRequest.MetaRoleToUpdate != null)
+                {
+                    if (Guid.TryParse(assignClaimToRoleDtoRequest.MetaRoleToUpdate.ToString(), out var parsedGuid))
+                    {
+                        metaRoleId = parsedGuid;
+                    }
+                }
+                
+                var metaRoleToUpdate = await _metaRoleRepository.GetMetaRoleBasedOnId(metaRoleId);
+                var existingClaims = await _roleRepository.GetRoleClaims(role);
 
-                // Dictionary to map permission names to their respective boolean properties
                 var permissions = new Dictionary<string, bool>
                 {
                     { "CanView", rolePermissionClaimDto.CanView },
@@ -202,49 +255,124 @@ public class RoleService : IRoleService
 
                 foreach (var permission in permissions)
                 {
-                    var claim = new Claim($"Permission:{role.Name}", permission.Key);
-                    bool claimExists = existingClaims.Any(c => c.Type == claim.Type && c.Value == claim.Value);
+                    var claimType = $"Permission:{role.Name}";
 
-                    if (permission.Value)
+                    if (metaRoleToUpdate != null)
                     {
-                        // Add claim if it does not exist
-                        if (!claimExists)
+                        var roleClaims = await _roleRepository.FindClaimBasedOnRole(role);
+                        if (roleClaims == null || !roleClaims.Any()) 
                         {
-                            var result = await _roleManager.AddClaimAsync(role, claim);
-                            if (!result.Succeeded)
+                            return IdentityResult.Failed(new IdentityError
+                            { 
+                                Description = $"Role '{role.Name}' has no claims." 
+                            });
+                        }
+                        
+                        var claim = roleClaims.FirstOrDefault(c => c.ClaimType == claimType && c.ClaimValue == permission.Key);
+
+                        // if you want to add the claim
+                        if (permission.Value && claim != null)
+                        {
+                            var existingMetaRoleBasedOnId = await _roleRepository.FindMetaRoleClaimsBasedOnId(metaRoleToUpdate.Id, claimType, permission.Key);
+
+                            if (existingMetaRoleBasedOnId == null)
                             {
-                                errors.Add(new IdentityError
-                                {
-                                    Description = $"Failed to assign '{permission.Key}' claim to role '{role.Name}'."
-                                });
+                                await _roleRepository.AddMetaRoleClaim(claim.Id, metaRoleToUpdate.Id);
+                            }
+                            
+                        }
+                        // if you want to remove the claim
+                        else if (!permission.Value && claim != null)
+                        {
+                            var existingMetaRoleClaimsPivotBasedOnId = await _roleRepository.FindMetaRoleClaimsBasedOnId(metaRoleToUpdate.Id, claimType, permission.Key);
+
+                            if (existingMetaRoleClaimsPivotBasedOnId != null)
+                            {
+                                await _roleRepository.DestroyMetaRolePivot(existingMetaRoleClaimsPivotBasedOnId.Id);
                             }
                         }
                     }
                     else
                     {
-                        // Remove claim if it exists
-                        if (claimExists)
+                        var claim = new Claim(claimType, permission.Key);
+                        bool claimExists = existingClaims.Any(c => c.Type == claim.Type && c.Value == claim.Value);
+
+                        IdentityResult result;
+                        if (permission.Value && !claimExists)
                         {
-                            var result = await _roleManager.RemoveClaimAsync(role, claim);
-                            if (!result.Succeeded)
-                            {
-                                errors.Add(new IdentityError
-                                {
-                                    Description = $"Failed to remove '{permission.Key}' claim from role '{role.Name}'."
-                                });
-                            }
+                            result = await _roleRepository.AddClaimAsync(role, claim);
+                        }
+                        else if (!permission.Value && claimExists)
+                        {
+                            result = await _roleRepository.RemoveClaimsFromRole(role, claim);
+                        }
+                        else
+                        {
+                            continue;
+                        }
+
+                        if (!result.Succeeded)
+                        {
+                            errors.Add(new IdentityError
+                                { Description = $"Failed to modify claim '{permission.Key}' for role '{role.Name}'." });
                         }
                     }
                 }
             }
 
-            return errors.Count() > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
+            return errors.Any() ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success;
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error assigning claims to role: {ex.Message}");
+            _logger.LogError(ex, "Error assigning claims to role.");
             return IdentityResult.Failed(new IdentityError
                 { Description = "An unexpected error occurred while assigning claims to the role." });
         }
+    }
+
+    public async Task<bool> UserHasMetaClaims(ClaimsPrincipal user, string claimType, string claimValue)
+    {
+        ApplicationUser? applicationUser = await _userRepository.GetUserUsingClaimPrinciple(user);
+
+        if (applicationUser is { MetaRoleId: null })
+        {
+            return false;
+        }
+
+        if (applicationUser != null)
+        {
+            MetaRole? metaRole = await _metaRoleRepository.GetMetaRoleBasedOnId((Guid)applicationUser.MetaRoleId);
+
+            if (metaRole is not null)
+            {
+                return _roleRepository.UserHasMetaClaims(applicationUser, claimType, claimValue, metaRole);
+            }
+        }
+
+        return false;
+    }
+
+    public async Task<RoleServiceResponse> GetAllRole(RoleFilters roleFilter)
+    {
+        List<RoleResponse>? roleAndClaims = await _roleRepository.GetPageRoleIncludingMetaRoleAndClaims(roleFilter);
+
+        if (roleAndClaims is not null)
+        {
+            return roleAndClaims.ToRoleServiceResponse();
+        }
+        else
+        {
+            return new RoleServiceResponse()
+            {
+                RoleResponses = new List<RoleResponse>()
+            };
+        }
+    }
+
+    public async Task<MetaRole?> FindMetaRoleBasedOnMetaRoleName(string metaRoleName)
+    {
+        MetaRole? metaRole = await _metaRoleRepository.GetMetaRoleBasedOnName(metaRoleName);
+
+        return metaRole;
     }
 }

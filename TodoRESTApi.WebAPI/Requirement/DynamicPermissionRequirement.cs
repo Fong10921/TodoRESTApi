@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using TodoRESTApi.ServiceContracts;
 
 namespace TodoRESTApi.WebAPI.Requirement;
 
@@ -16,19 +17,35 @@ public class DynamicPermissionRequirement : IAuthorizationRequirement
 
 public class DynamicPermissionHandler : AuthorizationHandler<DynamicPermissionRequirement>
 {
-    protected override Task HandleRequirementAsync(
+    private readonly IRoleService _roleService;
+
+    public DynamicPermissionHandler(IRoleService roleService)
+    {
+        _roleService = roleService;
+    }
+    
+    protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         DynamicPermissionRequirement requirement)
     {
         // Construct the claim type based on the role (scope)
         var claimType = $"Permission:{requirement.Role}";
         // Check if the user has a claim with this type and the matching action as value
-        if (context.User.HasClaim(c =>
-                c.Type.Equals(claimType, StringComparison.OrdinalIgnoreCase) &&
-                c.Value.Equals(requirement.Action, StringComparison.OrdinalIgnoreCase)))
+
+        var userHasNormalClaim = context.User.HasClaim(c =>
+            c.Type.Equals(claimType, StringComparison.OrdinalIgnoreCase) &&
+            c.Value.Equals(requirement.Action, StringComparison.OrdinalIgnoreCase));
+
+        var userHasMetaClaim = false;
+                
+        if (userHasNormalClaim == false)
+        {
+            userHasMetaClaim = await _roleService.UserHasMetaClaims(context.User, claimType, requirement.Action);
+        }        
+        
+        if (userHasNormalClaim || userHasMetaClaim)
         {
             context.Succeed(requirement);
         }
-        return Task.CompletedTask;
     }
 }

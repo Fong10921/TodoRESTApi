@@ -10,6 +10,7 @@ using TodoRESTApi.ServiceContracts.DTO.Response;
 namespace TodoRESTApi.WebAPI.Pages;
 
 [Authorize(Policy = "Permission:Todo:CanView")]
+[ValidateAntiForgeryToken]
 public class IndexModel : PageModel
 {
     private readonly HttpClient _httpClient;
@@ -88,7 +89,7 @@ public class IndexModel : PageModel
             Console.WriteLine($"Error fetching todos: {ex.Message}");
         }
     }
-
+    
     public async Task<IActionResult> OnPostAsync()
     {
         string baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";

@@ -1,11 +1,11 @@
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace TodoRESTApi.Entities.Migrations
 {
     /// <inheritdoc />
-    public partial class AddTimeZoneToTodoEntities : Migration
+    public partial class AddTimeZone : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -1,51 +1,70 @@
-@page "/Account/Role"
-@model RoleModel
+@page "/Role"
+@model Role
 
 @{
-    ViewData["Title"] = "Permissions Management";
+    ViewBag.Title = "Create Role";
 }
 
-<div class="container mt-4">
-    <h2>@ViewData["Title"]</h2>
-    <form method="post">
-        <table class="table table-bordered table-hover">
-            <thead class="thead-light">
-            <tr>
-                <th>Page</th>
-                <th>Create</th>
-                <th>View</th>
-                <th>Edit</th>
-                <th>Delete</th>
-                <th>Export</th>
-            </tr>
-            </thead>
-            <tbody>
-            @for (int i = 0; i < Model.PagePermissionViewModels.Count(); i++)
+<div class="container mt-5">
+       <div class="d-flex justify-content-between align-items-center">
+        <h2>Role List</h2>
+        <div>
+            <a class="btn btn-sm btn-primary" href="/Role/CreateRole">Create Role</a>
+        </div>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>
+                <form method="get">
+                    <button type="submit" class="no-style">
+                        Index
+                    </button>
+                </form>
+            </th>
+            <th>
+                <form method="get">
+                    @*<input type="hidden" asp-for="SortBy" value="@TodoSortField.Name"/>
+                    <input type="hidden" asp-for="SortDescending" value="@(!Model.SortDescending)"/>*@
+                    <button type="submit" class="no-style">
+                        Name @*@(Model.SortBy == TodoSortField.Name && Model.SortDescending ? "↓" : "↑")*@
+                    </button>
+                </form>
+            </th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @if (Model.RoleServiceResponse is not null)
+        {
+            int index = 1;
+            foreach (var roleResponse in Model.RoleServiceResponse.RoleResponses)
             {
                 <tr>
+                    <td>@index</td>
+                    <td>@roleResponse.RoleName</td>
                     <td>
-                        @Html.DisplayFor(m => Model.PagePermissionViewModels.ElementAt(i).RoleName)
-                        @Html.HiddenFor(m => Model.PagePermissionViewModels.ElementAt(i).RoleName)
-                    </td>
-                    <td class="text-center">
-                        @Html.CheckBoxFor(m => Model.PagePermissionViewModels.ElementAt(i).CanCreate)
-                    </td>
-                    <td class="text-center">
-                        @Html.CheckBoxFor(m => Model.PagePermissionViewModels.ElementAt(i).CanView)
-                    </td>
-                    <td class="text-center">
-                        @Html.CheckBoxFor(m => Model.PagePermissionViewModels.ElementAt(i).CanEdit)
-                    </td>
-                    <td class="text-center">
-                        @Html.CheckBoxFor(m => Model.PagePermissionViewModels.ElementAt(i).CanDelete)
-                    </td>
-                    <td class="text-center">
-                        @Html.CheckBoxFor(m => Model.PagePermissionViewModels.ElementAt(i).CanExport)
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-sm btn-primary" href="/Role/EditRole/@roleResponse.RoleId">Edit</a>
+                            <form method="post">
+                                <input type="hidden" name="RoleId" asp-for="RoleId" value="@roleResponse.RoleId"/>
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
+                index++;
             }
-            </tbody>
-        </table>
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-    </form>
+        }
+        else
+        {
+            <tr>
+                <td colspan="3">No Roles found.</td>
+            </tr>
+        }
+        </tbody>
+    </table>
 </div>

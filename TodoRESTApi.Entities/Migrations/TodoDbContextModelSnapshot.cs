@@ -175,6 +175,9 @@ namespace TodoRESTApi.Entities.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("RoleType")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
@@ -209,6 +212,10 @@ namespace TodoRESTApi.Entities.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("MetaRoleId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("MetaRoleId");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -248,6 +255,8 @@ namespace TodoRESTApi.Entities.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("MetaRoleId");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -256,6 +265,44 @@ namespace TodoRESTApi.Entities.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("TodoRESTApi.identity.Identity.MetaRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MetaRoleName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MetaRoles");
+                });
+
+            modelBuilder.Entity("TodoRESTApi.identity.Identity.MetaRoleClaimsPivot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MetaRoleId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("MetaRoleId");
+
+                    b.Property<int>("RoleClaimId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("RoleClaimId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MetaRoleId");
+
+                    b.HasIndex("RoleClaimId");
+
+                    b.ToTable("MetaRoleClaimsPivots");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -307,6 +354,39 @@ namespace TodoRESTApi.Entities.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TodoRESTApi.identity.Identity.ApplicationUser", b =>
+                {
+                    b.HasOne("TodoRESTApi.identity.Identity.MetaRole", "MetaRole")
+                        .WithMany()
+                        .HasForeignKey("MetaRoleId");
+
+                    b.Navigation("MetaRole");
+                });
+
+            modelBuilder.Entity("TodoRESTApi.identity.Identity.MetaRoleClaimsPivot", b =>
+                {
+                    b.HasOne("TodoRESTApi.identity.Identity.MetaRole", "MetaRole")
+                        .WithMany("MetaRoleClaimsPivots")
+                        .HasForeignKey("MetaRoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", "IdentityRoleClaim")
+                        .WithMany()
+                        .HasForeignKey("RoleClaimId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("IdentityRoleClaim");
+
+                    b.Navigation("MetaRole");
+                });
+
+            modelBuilder.Entity("TodoRESTApi.identity.Identity.MetaRole", b =>
+                {
+                    b.Navigation("MetaRoleClaimsPivots");
                 });
 #pragma warning restore 612, 618
         }

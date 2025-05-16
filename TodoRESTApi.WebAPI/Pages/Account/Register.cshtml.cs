@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -14,8 +15,10 @@ using Microsoft.AspNetCore.WebUtilities;
 using TodoRESTApi.Core.ExternalHelperInterface;
 using TodoRESTApi.identity.Identity;
 
+
 namespace TodoRESTApi.WebAPI.Pages.Account
 {
+    [AllowAnonymous]
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -139,8 +142,6 @@ namespace TodoRESTApi.WebAPI.Pages.Account
                         {
                             { "ConfirmUrl", callbackUrl }
                         };
-                        
-                        _logger.LogDebug($"Hello from Asp.NET Core {callbackUrl}");
 
                         _backgroundJobClient.Enqueue(() =>
                             _emailSender.SendEmailWithTemplateAsync(Input.Email, "Confirm your email", templatePath,

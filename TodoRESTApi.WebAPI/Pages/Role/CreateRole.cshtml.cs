@@ -30,7 +30,6 @@ public class CreateRole: PageModel
 
             if (!response.IsSuccessStatusCode)
             {
-                var errorResponse2 = response;
                 var errorResponse = await response.Content.ReadAsStringAsync();
                 try
                 {
@@ -52,7 +51,7 @@ public class CreateRole: PageModel
                 return Page();
             }
             
-            return LocalRedirect("/Role/CreateRole");
+            return LocalRedirect("/Role");
         }
         
         return Page();

@@ -5,8 +5,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using TodoRESTApi.identity.DTO;
+using TodoRESTApi.identity.Enums;
 using TodoRESTApi.identity.Identity;
-using TodoRESTApi.identity.ServiceContracts;
+using TodoRESTApi.ServiceContracts;
+using TodoRESTApi.ServiceContracts.DTO.Response;
+using TodoRESTApi.ServiceContracts.Filters;
 using TodoRESTApi.WebAPI.Requirement;
 
 namespace TodoRESTApi.WebAPI.Controllers.V1.RESTApi;
@@ -99,8 +102,8 @@ public class RoleController : ControllerBase
         return Ok(new { Message = "User has been added to role successfully." });
     }
 
-    [HttpPost]
-    public async Task<ActionResult> AssignClaimToUser([FromBody] AssignClaimToRoleDto assignClaimToRoleDto)
+    [HttpPatch]
+    public async Task<ActionResult> AssignClaimToRole([FromBody] AssignClaimToRoleDtoRequest assignClaimToRoleDtoRequest)
     {
         if (!ModelState.IsValid)
         {
@@ -110,7 +113,7 @@ public class RoleController : ControllerBase
             return BadRequest(new { Errors = errors });
         }
         
-        var result = await _roleService.AssignClaimToRole(assignClaimToRoleDto);
+        var result = await _roleService.AssignClaimToRole(assignClaimToRoleDtoRequest);
 
         if (result.Errors.Any())
         {
@@ -164,10 +167,25 @@ public class RoleController : ControllerBase
     }
 
     [HttpGet("list-policies")]
+    [ProducesResponseType(typeof(List<string>), StatusCodes.Status200OK)]
     public IActionResult GetAllPolicies()
     {
         var policyNames = _authorizationOptions.PolicyNames().ToList();
         return Ok(policyNames);
+    }
+    
+    [HttpGet]
+    [ProducesResponseType(typeof(RoleServiceResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllRoles([FromQuery] RoleType roleType, [FromQuery] Guid metaRoleId)
+    {
+        RoleFilters roleFilters = new RoleFilters()
+        {
+            RoleTypeToGet = roleType,
+            MetaRoleId = metaRoleId
+        };
+         
+        RoleServiceResponse roles = await _roleService.GetAllRole(roleFilters);
+        return Ok(roles);
     }
 }
 

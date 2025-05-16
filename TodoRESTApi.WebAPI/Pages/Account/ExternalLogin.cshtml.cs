@@ -6,12 +6,14 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using TodoRESTApi.Core.ExternalHelperInterface;
 using TodoRESTApi.identity.Identity;
 
 namespace TodoRESTApi.WebAPI.Pages.Account
@@ -23,15 +25,18 @@ namespace TodoRESTApi.WebAPI.Pages.Account
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserStore<ApplicationUser> _userStore;
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
-        private readonly IEmailSender _emailSender;
+        private readonly ICustomEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IWebHostEnvironment _env;
+        private readonly IBackgroundJobClient _backgroundJobClient;
 
         public ExternalLoginModel(
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             ILogger<ExternalLoginModel> logger,
-            IEmailSender emailSender)
+            ICustomEmailSender emailSender, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IBackgroundJobClient backgroundJobClient)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -39,6 +44,9 @@ namespace TodoRESTApi.WebAPI.Pages.Account
             _emailStore = GetEmailStore();
             _logger = logger;
             _emailSender = emailSender;
+            _httpContextAccessor = httpContextAccessor;
+            _env = env;
+            _backgroundJobClient = backgroundJobClient;
         }
 
         /// <summary>
@@ -82,6 +90,15 @@ namespace TodoRESTApi.WebAPI.Pages.Account
             public string Email { get; set; }
         }
         
+        [TempData]
+        public string LoginProvider { get; set; }
+        
+        [TempData]
+        public string ProviderKey { get; set; }
+        
+        [TempData]
+        public string DisplayName { get; set; }
+        
         public IActionResult OnGet() => RedirectToPage("./Login");
 
         public IActionResult OnPost(string provider, string returnUrl = null)
@@ -101,11 +118,17 @@ namespace TodoRESTApi.WebAPI.Pages.Account
                 return RedirectToPage("/Account/Login", new { ReturnUrl = returnUrl });
             }
             var info = await _signInManager.GetExternalLoginInfoAsync();
+            // Temp Save the external login info
+
             if (info == null)
             {
                 ErrorMessage = "Error loading external login information.";
                 return RedirectToPage("/Account/Login", new { ReturnUrl = returnUrl });
             }
+            
+            LoginProvider = info.LoginProvider;
+            ProviderKey = info.ProviderKey;
+            DisplayName = info.ProviderDisplayName;
 
             // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
@@ -138,12 +161,13 @@ namespace TodoRESTApi.WebAPI.Pages.Account
         {
             returnUrl = returnUrl ?? Url.Content("~/");
             // Get the information about the user from the external login provider
-            var info = await _signInManager.GetExternalLoginInfoAsync();
+            /*var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
                 ErrorMessage = "Error loading external login information during confirmation.";
                 return RedirectToPage("/Account/Login", new { ReturnUrl = returnUrl });
-            }
+            }*/
+            var info = new UserLoginInfo(LoginProvider, ProviderKey, ProviderDisplayName);
 
             if (ModelState.IsValid)
             {
@@ -151,6 +175,7 @@ namespace TodoRESTApi.WebAPI.Pages.Account
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+
 
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
@@ -166,12 +191,24 @@ namespace TodoRESTApi.WebAPI.Pages.Account
                         var callbackUrl = Url.Page(
                             "/Account/ConfirmEmail",
                             pageHandler: null,
-                            values: new { area = "Identity", userId = userId, code = code },
+                            values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                             protocol: Request.Scheme);
+                        
+                        if (callbackUrl != null)
+                        {
+                            string templatePath = Path.Combine(_env.ContentRootPath, "Pages/Template/ConfirmEmail.cshtml");
 
-                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                            var viewData = new Dictionary<string, object>
+                            {
+                                { "ConfirmUrl", callbackUrl }
+                            };
 
+                            _backgroundJobClient.Enqueue(() =>
+                                _emailSender.SendEmailWithTemplateAsync(Input.Email, "Confirm your email", templatePath,
+                                    viewData)
+                            );
+                        }
+                        
                         // If account confirmation is required, we need to show the link if we don't have a real email sender
                         if (_userManager.Options.SignIn.RequireConfirmedAccount)
                         {
@@ -190,6 +227,7 @@ namespace TodoRESTApi.WebAPI.Pages.Account
 
             ProviderDisplayName = info.ProviderDisplayName;
             ReturnUrl = returnUrl;
+            // If we got this far, something failed, redisplay form
             return Page();
         }
 

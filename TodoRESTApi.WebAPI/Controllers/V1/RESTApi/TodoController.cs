@@ -1,7 +1,10 @@
-﻿using Asp.Versioning;
+﻿using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TodoRESTApi.Core.Enums;
+using TodoRESTApi.Core.TelemetryInterface;
 using TodoRESTApi.ServiceContracts;
 using TodoRESTApi.ServiceContracts.DTO.Request;
 using TodoRESTApi.ServiceContracts.DTO.Response;
@@ -17,10 +20,14 @@ namespace TodoRESTApi.WebAPI.Controllers.V1.RESTApi;
 public class TodoController : ControllerBase
 {
     private readonly ITodoService _todoService;
+    private readonly ILogger<TodoController> _logger;
+    private readonly IGreetingTelemetry _telemetry;
 
-    public TodoController(ITodoService todoService)
+    public TodoController(ITodoService todoService, ILogger<TodoController> logger, IGreetingTelemetry telemetry)
     {
         _todoService = todoService;
+        _logger = logger;
+        _telemetry = telemetry;
     }
     
     [HttpGet("GetTodo")]
@@ -45,6 +52,10 @@ public class TodoController : ControllerBase
             Status = status,
             GetAll = !todoId.HasValue // If todoId is null, get all todos
         };
+        
+        _telemetry.TrackGreeting();
+
+        using var activity = _telemetry.StartGreetingActivity("GreetedUser");
 
         var todos = await _todoService.GetTodoByTodoIdWithFilter(todoFilters);
 

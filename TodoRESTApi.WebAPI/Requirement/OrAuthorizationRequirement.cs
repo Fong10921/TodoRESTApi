@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using TodoRESTApi.ServiceContracts;
 
 namespace TodoRESTApi.WebAPI.Requirement;
 
@@ -14,7 +15,15 @@ public class OrAuthorizationRequirement : IAuthorizationRequirement
 
 public class OrAuthorizationHandler : AuthorizationHandler<OrAuthorizationRequirement>
 {
-    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, OrAuthorizationRequirement requirement)
+    private readonly IRoleService _roleService;
+
+    public OrAuthorizationHandler(IRoleService roleService)
+    {
+        _roleService = roleService;
+    }
+
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
+        OrAuthorizationRequirement requirement)
     {
         foreach (var policy in requirement.Policies)
         {
@@ -23,14 +32,20 @@ public class OrAuthorizationHandler : AuthorizationHandler<OrAuthorizationRequir
             {
                 var claimType = parts[0] + ":" + parts[1];
                 var claimValue = parts[2];
+
+                var userHasNormalClaim = context.User.HasClaim(c => c.Type == claimType && c.Value == claimValue);
+                var userHasMetaClaim = false;
                 
-                if (context.User.HasClaim(c => c.Type == claimType && c.Value == claimValue))
+                if (userHasNormalClaim == false)
+                {
+                    userHasMetaClaim = await _roleService.UserHasMetaClaims(context.User, claimType, claimValue);
+                }
+
+                if (userHasNormalClaim || userHasMetaClaim)
                 {
                     context.Succeed(requirement);
-                    return Task.CompletedTask;
                 }
             }
         }
-        return Task.CompletedTask;
     }
 }

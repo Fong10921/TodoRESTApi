@@ -1,13 +1,10 @@
 using Asp.Versioning.ApiExplorer;
-using Elastic.CommonSchema.Serilog;
-using Elastic.Ingest.Elasticsearch;
-using Elastic.Ingest.Elasticsearch.DataStreams;
-using Elastic.Serilog.Sinks;
-using Elastic.Transport;
 using Hangfire;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.RateLimiting;
 using Serilog;
 using TodoRESTApi.WebAPI.StartupExtensions;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +17,6 @@ builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider services,
 {
     loggerConfiguration.ReadFrom.Configuration(context.Configuration).ReadFrom.Services(services);
 });
-
 
 var app = builder.Build();
 
@@ -61,20 +57,72 @@ app.UseSerilogRequestLogging(); // Use the Serilog to log the request as a middl
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-// Add Background Jobs Dashboard
-app.UseHangfireDashboard("/hangfire"); 
-
-app.MapRazorPages();
-
 app.UseRouting();
 
+app.Use(async (context, next) =>
+{
+    var endpoint = context.GetEndpoint();
+    if (endpoint != null)
+    {
+        // Check for the DisableRateLimiting attribute
+        var disableRateLimit = endpoint.Metadata.Any(m => m is DisableRateLimitingAttribute);
+
+        // Log the endpoint information along with whether rate limiting is disabled
+        var logger = context.RequestServices.GetRequiredService<ILoggerFactory>()
+            .CreateLogger("EndpointDebugLogger");
+        logger.LogInformation("Endpoint: {EndpointDisplayName}, RateLimiting Disabled: {DisableRateLimit}",
+            endpoint.DisplayName, disableRateLimit);
+    }
+
+    await next();
+});
+
+
+// Need to be after UseRouting for DisableRateLimiting to work
+app.UseRateLimiter();
+
+app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseHeaderPropagation();
 
+// Add Background Jobs Dashboard
+app.UseHangfireDashboard("/hangfire");
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+app.MapRazorPages();
+
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (HttpRequestException ex) when (ex.Message.Contains("Rate limit exceeded"))
+    {
+        // The redirect has already been issued in the handler.
+        // Optionally, you can also end the response here.
+        context.Response.StatusCode = StatusCodes.Status307TemporaryRedirect;
+        await context.Response.CompleteAsync();
+    }
+});
+
+app.MapHealthChecksUI();
+
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    Predicate = _ => true, // run ALL checks
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+}).RequireAuthorization("HealthCheckPolicy");
+
+// Configure the Prometheus scraping endpoint
+app.MapPrometheusScrapingEndpoint().AllowAnonymous();
+
 app.Run();
+
+// Require for integration test
+public partial class Program { }

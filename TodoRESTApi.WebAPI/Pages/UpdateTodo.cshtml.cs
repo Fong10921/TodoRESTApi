@@ -9,7 +9,7 @@ using TodoRESTApi.ServiceContracts.DTO.Response;
 
 namespace TodoRESTApi.WebAPI.Pages;
 
-[Authorize(Policy = "Permission:Todo:EditView")]
+[Authorize(Policy = "Permission:Todo:CanEdit")]
 public class UpdateTodoModel : PageModel
 {
     private readonly HttpClient _httpClient;
@@ -74,7 +74,7 @@ public class UpdateTodoModel : PageModel
         
         string baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
 
-        string apiUrl = $"{baseUrl}/api/v1/PatchTodo";
+        string apiUrl = $"{baseUrl}/api/v1/Role/AssignClaimToRole";
 
         TodoUpdateRequest.Id = Id;
 

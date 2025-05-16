@@ -1,5 +1,4 @@
 @page ""
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 @using TodoRESTApi.Core.Enums
 @model TodoRESTApi.WebAPI.Pages.IndexModel
 
@@ -47,13 +46,14 @@
             <div class="col-md-3">
                 <label>From (Due Date)</label>
                 <input type="datetime-local" class="form-control" asp-for="FromDueDate">
+                <input asp-for="TimeZone" type="hidden" id="userTimeZone" />
             </div>
 
             <div class="col-md-3">
                 <label>To (Due Date)</label>
                 <input type="datetime-local" class="form-control" asp-for="ToDueDate">
             </div>
-
+            
             <div class="col-md-3 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary">Filter</button>
                 <a href="/" class="btn btn-secondary ms-2">Reset</a>
@@ -157,9 +157,13 @@
         else
         {
             <tr>
-                <td colspan="7">No todos found.</td>
+                <td colspan="3">No todos found.</td>
             </tr>
         }
         </tbody>
     </table>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

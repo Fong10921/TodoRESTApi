@@ -13,9 +13,9 @@ public class CreateTodoModel : PageModel
     private readonly HttpClient _httpClient;
     private readonly ILogger<CreateTodoModel> _logger;
     
-    public CreateTodoModel(HttpClient httpClient, ILogger<CreateTodoModel> logger)
+    public CreateTodoModel(IHttpClientFactory httpClientFactory, ILogger<CreateTodoModel> logger)
     {
-        _httpClient = httpClient;
+        _httpClient = httpClientFactory.CreateClient("WithCookies");
         _logger = logger;
     }
     

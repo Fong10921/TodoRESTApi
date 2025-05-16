@@ -10,7 +10,7 @@
 <form method="post">
     <div class="mb-3">
         <label asp-for="TodoAddRequest.Name" class="form-label"></label>
-        <input asp-for="TodoAddRequest.Name" class="form-control" />
+        <input asp-for="TodoAddRequest.Name" class="form-control"/>
         <span asp-validation-for="TodoAddRequest.Name" class="text-danger"></span>
     </div>
     <div class="mb-3">
@@ -19,9 +19,11 @@
         <span asp-validation-for="TodoAddRequest.Description" class="text-danger"></span>
     </div>
     <div class="mb-3">
+        <input type="hidden" id="userTimeZone" asp-for="TodoAddRequest.TimeZone">
         <label asp-for="TodoAddRequest.DueDate" class="form-label"></label>
-        <input asp-for="TodoAddRequest.DueDate" class="form-control" type="datetime-local" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+        <input asp-for="TodoAddRequest.DueDate" class="form-control" type="datetime-local" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"/>
         <span asp-validation-for="TodoAddRequest.DueDate" class="text-danger"></span>
+        <span asp-validation-for="TodoAddRequest.TimeZone" class="text-danger"></span>
     </div>
     <div class="mb-3">
         <label asp-for="TodoAddRequest.Status" class="form-label"></label>
@@ -47,7 +49,7 @@
     </div>
     <div class="mb-3">
         <label asp-for="TodoAddRequest.Category" class="form-label"></label>
-        <input asp-for="TodoAddRequest.Category" class="form-control" />
+        <input asp-for="TodoAddRequest.Category" class="form-control"/>
         <span asp-validation-for="TodoAddRequest.Category" class="text-danger"></span>
     </div>
     <div class="d-flex justify-content-end">

@@ -1,0 +1,62 @@
+@page "/Role/EditRole/{RoleId:guid}"
+@model RoleModel
+
+@{
+    ViewData["Title"] = "Permissions Management";
+}
+
+<div class="container mt-4">
+    <h2>@ViewData["Title"]</h2>
+    <form method="post">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-light">
+            <tr>
+                <th class="text-center">Page</th>
+                <th class="text-center">Create</th>
+                <th class="text-center">View</th>
+                <th class="text-center">Edit</th>
+                <th class="text-center">Delete</th>
+                <th class="text-center">Export</th>
+            </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.RoleResponse.PrimeRoleWithClaim.Count(); i++)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(model => model.RoleResponse.PrimeRoleWithClaim[i].RoleName)
+                            <input asp-for="AssignClaimToRoleDtoRequest.RolePermissionClaimDtos[i].RoleName"
+                                   value="@Model.RoleResponse.PrimeRoleWithClaim[i].RoleName" class="form-check-input"
+                                   hidden/>
+                        </td>
+                        <td class="text-center">
+                            <input checked="@Model.RoleResponse.PrimeRoleWithClaim[i].Claims.FirstOrDefault(c => c.ClaimValue == "CanCreate")?.Checked" asp-for="AssignClaimToRoleDtoRequest.RolePermissionClaimDtos[i].CanCreate" type="checkbox"
+                                   class="form-check-input"/>
+                        </td>
+                        <td class="text-center">
+                            <input checked="@Model.RoleResponse.PrimeRoleWithClaim[i].Claims.FirstOrDefault(c => c.ClaimValue == "CanEdit")?.Checked" asp-for="AssignClaimToRoleDtoRequest.RolePermissionClaimDtos[i].CanEdit" type="checkbox"
+                                   class="form-check-input"/>
+                        </td>
+                        <td class="text-center">
+                            <input checked="@Model.RoleResponse.PrimeRoleWithClaim[i].Claims.FirstOrDefault(c => c.ClaimValue == "CanDelete")?.Checked" asp-for="AssignClaimToRoleDtoRequest.RolePermissionClaimDtos[i].CanDelete" type="checkbox"
+                                   class="form-check-input"/>
+                        </td>
+                        <td class="text-center">
+                            <input checked="@Model.RoleResponse.PrimeRoleWithClaim[i].Claims.FirstOrDefault(c => c.ClaimValue == "CanExport")?.Checked" asp-for="AssignClaimToRoleDtoRequest.RolePermissionClaimDtos[i].CanExport" type="checkbox"
+                                   class="form-check-input"/>
+                        </td>
+                        <td class="text-center">
+                            <input checked="@Model.RoleResponse.PrimeRoleWithClaim[i].Claims.FirstOrDefault(c => c.ClaimValue == "CanView")?.Checked" asp-for="AssignClaimToRoleDtoRequest.RolePermissionClaimDtos[i].CanView" type="checkbox"
+                                   class="form-check-input"/>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+}

@@ -1,8 +1,11 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using TodoRESTApi.identity.DTO;
+using TodoRESTApi.identity.Identity;
+using TodoRESTApi.ServiceContracts.DTO.Response;
+using TodoRESTApi.ServiceContracts.Filters;
 
-namespace TodoRESTApi.identity.ServiceContracts;
+namespace TodoRESTApi.ServiceContracts;
 
 /// <summary>
 /// Defines the contract for role-related operations in the application.
@@ -39,9 +42,32 @@ public interface IRoleService
     /// <summary>
     /// Assigns or removes claims for a specified role based on provided permissions.
     /// </summary>
-    /// <param name="assignClaimToRoleDto">The DTO containing role name and associated permissions.</param>
+    /// <param name="assignClaimToRoleDtoRequest">The DTO containing role name and associated permissions.</param>
     /// <returns>
     /// An <see cref="IdentityResult"/> indicating whether the claim assignment was successful.
     /// </returns>
-    Task<IdentityResult> AssignClaimToRole(AssignClaimToRoleDto assignClaimToRoleDto);
+    Task<IdentityResult> AssignClaimToRole(AssignClaimToRoleDtoRequest assignClaimToRoleDtoRequest);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="claimType"></param>
+    /// <param name="claimValue"></param>
+    /// <returns></returns>
+    Task<bool> UserHasMetaClaims(ClaimsPrincipal user, string claimType, string claimValue);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="roleFilters"></param>
+    /// <returns></returns>
+    Task<RoleServiceResponse> GetAllRole(RoleFilters roleFilters);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="metaRoleName"></param>
+    /// <returns></returns>
+    Task<MetaRole?> FindMetaRoleBasedOnMetaRoleName(string metaRoleName);
 }
